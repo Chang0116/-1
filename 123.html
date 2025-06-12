@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IG </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fafafa;
+      display: flex;
+    }
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      background: #fff;
+      border-right: 1px solid #ddd;
+      padding-top: 40px;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 20px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      cursor: pointer;
+      color: #333;
+      transition: background 0.2s;
+      font-size: 16px;
+    }
+    .sidebar ul li i {
+      margin-right: 12px;
+      font-size: 18px;
+    }
+    .sidebar ul li:hover {
+      background-color: #f0f0f0;
+    }
+
+    .main-content {
+      margin-left: 220px;
+      width: calc(100% - 220px);
+      padding: 40px;
+    }
+
+    .profile-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin-top: -230px; /* ⭐ 整體頭像往上移 */
+    }
+
+    .avatar-wrapper img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ddd;
+      cursor: pointer;
+    }
+
+    .sticky-note {
+      position: absolute;
+      top: -30px; /* ⭐ 便利貼貼近頭像 */
+      left: 50%;
+      transform: translateX(-50%) rotate(-5deg);
+      background: #eae8e1;
+      color: #222;
+      font-size: 15px;
+      padding: 10px 16px;
+      border-radius: 12px 18px 12px 18px;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.15);
+      font-weight: 600;
+      font-family: 'Comic Sans MS', 'Segoe Print', cursive;
+      border: 1px solid #9d9b92;
+      white-space: nowrap;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-info h2 { margin: 0; font-size: 28px; }
+    .profile-info .counts {
+      margin: 10px 0;
+      display: flex;
+      gap: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+    .profile-info p { font-size: 16px; color: #444; }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #3897f0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .gallery {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .gallery-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    .heart-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: #fff;
+      text-shadow: 0 0 3px rgba(0,0,0,0.5);
+    }
+
+    #lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #lightbox-img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+      }
+    }
+
+    .highlights {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+      justify-content: flex-start;
+    }
+
+    .highlight {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .highlight img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid white;
+      box-shadow: 0 0 0 2px #c7c7c7, 0 0 5px rgba(255,255,255,0.7);
+      margin-bottom: 6px;
+      background-color: #000;
+    }
+
+    /* Story page style */
+    #story-page {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: none;
+      color: #222;
+    }
+
+    #story-title {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+
+    #story-content p {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    #back-btn {
+      margin-top: 25px;
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #3897f0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+  </style>
+</head>
+<body>
+
+      <div class="sidebar">
+      <h2 style="display: flex; align-items: center; gap: 8px;">
+      <span style="
+        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        background: #dfa8a8;  /* 方形白底 */
+        border-radius: 6px; /* 方形略帶圓角 */
+        box-shadow: 0 0 6px rgba(255, 121, 175, 0.7);
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      ">
+        <span style="
+          display: block;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%; /* 圓形 */
+          border: 3px solid;
+          border-image: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888) 1;
+        "></span>
+      </span>
+      Zelegram
+    </h2>
+
+
+
+    <ul>
+      <li><i class="fa-solid fa-house"></i> 首頁</li>
+      <li><i class="fa-solid fa-magnifying-glass"></i> 搜尋</li>
+      <li><i class="fa-regular fa-square-plus"></i> 發文</li>
+      <li><i class="fa-regular fa-heart"></i> 通知</li>
+      <li><i class="fa-regular fa-user"></i> 個人檔案</li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+
+    <div class="profile-container">
+      <div class="profile-header">
+        <div class="avatar-wrapper">
+          <img src="img/1.jpg" alt="頭像" onclick="changeNote()" />
+          <div class="sticky-note">泥好!!</div>
+        </div>
+        <div class="profile-info">
+          <h2>林昱蒼</h2>
+          <div class="counts">
+            <span><strong>∞</strong> 貼文</span>
+            <span><strong>99999</strong> 追蹤者</span>
+            <span><strong>99999</strong> 追蹤中</span>
+          </div>
+          <h3>yu_.cang0116</h3>
+          <h7>@yu.cang0116</h7>
+          <p id="bio" style="cursor:text;">來自雲林西螺，目前就讀虎尾科技大學<br>喜歡數學、微積分和寫程式<br>下面是可愛的兔子⬇️⬇️⬇️</p>
+          <hr />
+          <div class="highlights">
+            <div class="highlight" data-category="intro">
+              <img src="img/8.jpg" alt="更多自我介紹">
+              <p>更多介紹</p>
+            </div>
+            <div class="highlight" data-category="rabbit">
+              <img src="img/6.jpg" alt="">
+              <p>家裡的兔兔</p>
+            </div>
+            <div class="highlight" data-category="school">
+              <img src="img/9.jpg" alt="其他">
+              <p>我的優點</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery">
+        <div class="gallery-item">
+          <img src="img/2.jpg" data-id="2" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="gallery-item">
+          <img src="img/3.jpg" data-id="3" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="gallery-item">
+          <img src="img/4.jpg" data-id="4" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="gallery-item">
+          <img src="img/5.jpg" data-id="5" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="gallery-item">
+          <img src="img/10.jpg" data-id="6" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+        <div class="gallery-item">
+          <img src="img/7.jpg" data-id="7" />
+          <button class="heart-btn"><i class="fa-regular fa-heart"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增故事頁面 -->
+    <div id="story-page">
+      <h2 id="story-title"></h2>
+      <div id="story-content"></div>
+      <button id="back-btn">返回個人頁面</button>
+    </div>
+
+  </div>
+
+  <div id="lightbox">
+    <img id="lightbox-img" src="" />
+  </div>
+
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const storyData = {
+    "intro": {
+      title: "更多介紹",
+      content: `<p>我是五資二甲林昱蒼17歲，來自雲林西螺，目前就讀虎尾科技大學</p>
+                <p>國中就讀斗六的正心中學</p>
+                <p>我的興趣是寫數學、算微積分、寫程式、運動、看書</p>
+                <p>平常會打籃球、慢跑</p>`
+    },
+    "rabbit": {
+      title: "家裡的兔兔",
+      content: `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <img src="img/11.jpg" alt="兔兔" style="width: 100%; border-radius: 12px;">
+            <img src="img/12.jpg" alt="兔兔" style="width: 100%; border-radius: 12px;">
+            <img src="img/13.jpg" alt="兔兔" style="width: 100%; border-radius: 12px;">
+            <img src="img/14.jpg" alt="兔兔" style="width: 100%; border-radius: 12px;">
+          </div>`
+    },
+    "school": {
+      title: "",
+      content: `<p>喜歡參加學校活動，喜歡嘗試新事物</p><p>
+
+
+有責任感
+
+自律、守時
+
+善於溝通
+
+樂於助人
+
+有創意
+
+適應力強
+
+抗壓性高
+
+熱情積極
+
+細心、謹慎
+
+開朗樂觀
+
+有團隊合作精神
+
+有領導能力<br>
+
+
+學習能力強
+
+解決問題能力高
+
+工作效率好
+
+能獨立完成任務
+
+重視細節
+
+分析能力強
+
+執行力強
+
+擅長時間管理
+
+數據處理或邏輯思考能力佳
+
+表達能力佳（口語／書面）
+
+熟悉某項技能或工具（例如：Excel、Photoshop、程式語言等）<br>
+
+
+善解人意
+
+擅長傾聽
+
+具有同理心
+
+團隊氣氛潤滑劑
+
+能處理衝突
+
+尊重他人意見
+
+有良好的人際互動能力<br>
+
+
+美感佳
+
+構圖能力好
+
+對流行敏銳
+
+能快速發想創意
+
+熟悉視覺設計軟體
+
+擅長影片剪輯／平面設計
+
+有獨特風格<br>
+
+
+持續自我成長
+
+樂於接受挑戰
+
+勇於面對失敗
+
+對新事物充滿好奇
+
+對生活充滿熱忱
+
+善於安排生活節奏
+
+</p></p>`
+    }
+  };
+
+  $(document).ready(function () {
+    // 點擊 highlight 類別切換 story 內容
+    $('.highlight').on('click', function () {
+      const cat = $(this).data('category');
+      $('#story-title').text(storyData[cat].title);
+      $('#story-content').html(storyData[cat].content);
+      $('.profile-container').hide();
+      $('#story-page').show();
+    });
+
+    // 返回按鈕
+    $('#back-btn').on('click', function () {
+      $('.profile-container').show();
+      $('#story-page').hide();
+    });
+
+    // 點擊圖片放大
+    $('.gallery-item img').on('click', function () {
+      $('#lightbox-img').attr('src', $(this).attr('src'));
+      $('#lightbox').css('display', 'flex');
+    });
+
+    // 點擊燈箱關閉
+    $('#lightbox').on('click', function (e) {
+      if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img') {
+        $('#lightbox').hide();
+      }
+    });
+
+    // 心形按鈕切換樣式
+    $('.heart-btn').on('click', function () {
+      const icon = $(this).find('i');
+      if (icon.hasClass('fa-regular')) {
+        icon.removeClass('fa-regular').addClass('fa-solid').css('color', 'red');
+      } else {
+        icon.removeClass('fa-solid').addClass('fa-regular').css('color', '');
+      }
+    });
+  });
+
+  // 便利貼切換文字
+  function changeNote() {
+    const $note = $('.sticky-note');
+    const notes = ["泥好!!", "愛你", "ez", " 6"];
+    const current = notes.indexOf($note.text());
+    $note.text(notes[(current + 1) % notes.length]);
+  }
+</script>
+
+</body>
+</html>
